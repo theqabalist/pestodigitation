@@ -18,7 +18,7 @@ object Main extends IOApp {
             .getOrElse(IO.pure(List()))
       )
       recipe = verified.flatten.maxBy(_.ingredients.size)
-      repr: String = Seq(
+      repr = Seq(
         "Top Result\n",
         "============\n",
         s"Title: ${recipe.title}\n",
