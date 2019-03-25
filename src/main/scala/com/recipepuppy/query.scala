@@ -1,28 +1,24 @@
 package com
 package recipepuppy
-
+import cats._
 import cats.implicits._
-import cats.effect._
 import org.http4s.Uri
 
-import pesto.http.fetch
-import pesto.PestoClient
-
 object query {
+  import pesto.http._
   val baseUrl = Uri.uri("http://www.recipepuppy.com/api/")
 
-  def apply(client: PestoClient)(ingredient: String, dish: String, page: Int = 0): IO[Vector[Recipe]] = {
+  def apply[F[_]: HttpMonad: MonadError[?[_], Throwable]](ingredient: String, dish: String, page: Int = 0): F[Vector[Recipe]] = {
     val uri = baseUrl +? ("i", ingredient) +? ("q", dish) +? ("p", page)
-
-    fetch[ResultPage](uri)
+    HttpMonad[F].fetch[ResultPage](uri)
       .flatMap(
         rp =>
           if (rp.results.isEmpty) {
-            IO.pure(rp.results)
+            rp.results.pure[F]
           } else {
-            query(client)(ingredient, dish, page + 1).fmap(more => rp.results ++ more)
+            query[F](ingredient, dish, page + 1).fmap(more => rp.results ++ more)
           }
       )
-      .handleErrorWith(_ => query(client)(ingredient, dish, page + 1))
+      .handleErrorWith(_ => query[F](ingredient, dish, page + 1))
   }
 }
