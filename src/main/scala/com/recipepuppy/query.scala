@@ -24,6 +24,5 @@ object query {
           }
       )
       .handleErrorWith(_ => query(client)(ingredient, dish, page + 1))
-
   }
 }

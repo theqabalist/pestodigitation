@@ -17,6 +17,7 @@ val http4sVersion = "0.19.0"
 
 libraryDependencies ++= Seq(
   "http4s-blaze-client",
+  "http4s-async-http-client",
   "http4s-circe"
 ).map("org.http4s" %% _ % http4sVersion)
 
