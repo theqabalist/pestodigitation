@@ -1,6 +1,8 @@
 import io.circe.{Decoder}
 import cats.data._
+import cats.implicits._
 import cats.effect._
+import cats.mtl._
 import org.http4s.client._
 import org.http4s.circe._
 import org.http4s.Uri
@@ -22,6 +24,18 @@ package pesto {
   
         def fetchRaw(uri: Uri): Kleisli[F, Client[F], String] = 
           Kleisli(client => FollowRedirect[F](10)(client).expect[String](uri))
+      }
+
+      implicit def forAsk[F[_]: Sync: ApplicativeAsk[?[_], Client[F]]]: HttpMonad[F] = new HttpMonad[F] {
+        def fetch[A: Decoder](uri: Uri): F[A] = 
+          ApplicativeAsk[F, Client[F]]
+            .ask
+            .flatMap(client => FollowRedirect[F](10)(client).expect(uri)(jsonOf[F, A]))
+
+        def fetchRaw(uri: Uri): F[String] = 
+          ApplicativeAsk[F, Client[F]]
+          .ask
+          .flatMap(client => FollowRedirect[F](10)(client).expect[String](uri))
       }
     }
   }

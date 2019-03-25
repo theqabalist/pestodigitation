@@ -19,13 +19,13 @@ object ResultPage {
         results <- c.downField("results").as[Vector[Recipe]]
         version <- c.downField("version").as[Float]
         title <- c.downField("title").as[String]
-      } yield {
+      } yield
         new ResultPage(
           href.toOption,
           results,
           version.toString,
           title.trim
         )
-      }
+
   }
 }
