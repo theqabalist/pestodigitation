@@ -6,11 +6,12 @@ import cats.effect._
 import org.http4s.Uri
 
 import pesto.http.fetch
+import pesto.PestoClient
 
 object query {
   val baseUrl = Uri.uri("http://www.recipepuppy.com/api/")
 
-  def apply(ingredient: String, dish: String, page: Int = 0): IO[Vector[Recipe]] = {
+  def apply(client: PestoClient)(ingredient: String, dish: String, page: Int = 0): IO[Vector[Recipe]] = {
     val uri = baseUrl +? ("i", ingredient) +? ("q", dish) +? ("p", page)
 
     fetch[ResultPage](uri)
@@ -19,10 +20,10 @@ object query {
           if (rp.results.isEmpty) {
             IO.pure(rp.results)
           } else {
-            query(ingredient, dish, page + 1).fmap(more => rp.results ++ more)
+            query(client)(ingredient, dish, page + 1).fmap(more => rp.results ++ more)
           }
       )
-      .handleErrorWith(_ => query(ingredient, dish, page + 1))
+      .handleErrorWith(_ => query(client)(ingredient, dish, page + 1))
 
   }
 }
