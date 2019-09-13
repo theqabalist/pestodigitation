@@ -19,13 +19,13 @@ object Recipe {
         ingredients <- c.downField("ingredients").as[String]
         thumbnail <- c.downField("thumbnail").as[String]
         title <- c.downField("title").as[String]
-      } yield {
+      } yield
         new Recipe(
           href.toOption,
           ingredients.split(",").map(_.trim).toVector,
           thumbnail.toOption,
           title.trim
         )
-      }
+
   }
 }
